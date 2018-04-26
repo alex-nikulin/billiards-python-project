@@ -1,19 +1,14 @@
 from direct.showbase.ShowBase import ShowBase
 import math
 from direct.task import Task
-from direct.actor.Actor import Actor
-from direct.interval.IntervalGlobal import Sequence
 from panda3d.core import Point3, Filename
 from direct.showbase import DirectObject
 import os, sys
 from panda3d.core import *
 from pandac.PandaModules import WindowProperties
-from panda3d.core import CollisionTraverser, CollisionHandler, CollisionNode, CollisionRay
 from classes import Balls, Circle
 import random
 
-
-from direct.gui.DirectGui import *
 
 class Vector3D():
     def __init__(self, x, y=0, z=0):
@@ -154,13 +149,6 @@ class MyApp(ShowBase):
         self.mydir = os.path.abspath(sys.path[0])
         self.mydir = Filename.fromOsSpecific(self.mydir).getFullpath()
 
-        #self.myObject = DirectFrame(text="Start", frameColor=(225, 225, 225, 1), frameSize = (1, -1, 1, -1), scale=0.2, pos = (0, 0, 0))
-        self.setBackgroundColor(0, 0, 0, 1)
-        self.scene = self.loader.loadModel("models/environment.egg")
-        self.scene.reparentTo(self.render)
-        self.scene.setScale(0.25, 0.25, 0.25)
-        self.scene.setPos(-8, 42, 0)
-
         self.table = self.loader.loadModel(self.mydir + "/models/table.egg")
         self.table.setScale(0.5, 0.5, 0.5)
         self.table.reparentTo(self.render)
@@ -211,8 +199,6 @@ class MyApp(ShowBase):
         self.taskMgr.add(self.spinCameraTask, "SpinCameraTask")
         self.taskMgr.add(self.balls, "balls")
         self.taskMgr.add(self.hitHandler, "tracking")
-        #self.taskMgr.add(self.gameStateOvereseer, "overseer")
-        #self.taskMgr.add(self.followPointer, "pointer")
         self.disable_mouse()
         self.handler = Handler()
         self.camera.setHpr(0,
@@ -242,15 +228,11 @@ class MyApp(ShowBase):
                 ):
 
                 if self.newMousePos[2] == "Empty":
-                    #self.keepPosition = [0, self.mouseWatcherNode.getMouseX(), self.mouseWatcherNode.getMouseY()]
-                    #print(self.keepPosition)
                     self.newMousePos[2] = "Filled"
                     props = self.win.getProperties()
                     self.win.movePointer(0,
                                          int(props.getXSize() / 2),
                                          int(props.getYSize() / 2))
-
-
                 else:
                     self.newMousePos = [self.mouseWatcherNode.getMouseX(), self.mouseWatcherNode.getMouseY(), "Filled"]
                     changeHor = self.newMousePos[0]
@@ -303,7 +285,6 @@ class MyApp(ShowBase):
 
     def balls(self, Task):
         if self.handler.mouse2pressed:
-
             print("new ball added")
             self.mass.add(Circle(random.uniform(-5.51, 5.51), random.uniform(-2.94, 2.94), 0.82, 0.2, 0.05 * random.random(), 0.05 * random.random(), 255, 0, 0, self.mydir, 0.00008, self.table))
             self.mass.balls[-1].model.setTexture(loader.loadTexture(self.mydir + "/models/tex/white.png"))
@@ -322,8 +303,6 @@ class MyApp(ShowBase):
             elif self.handler.currentGameState == "game":
                 self.cameraLookAt = [0, 0, 3.7]
                 self.handler.theGameHasChanged = False
-
-
             cameraHorHprRadians = self.camera.getHpr()[0] * math.pi / 180.0
             cameraVerHprRadians = self.camera.getHpr()[1] * math.pi / 180.0
             self.handler.radius = 3 if self.handler.currentGameState == "zoomed_mode" else 10
@@ -338,6 +317,7 @@ class MyApp(ShowBase):
             self.strength += self.mouseWatcherNode.getMouseY()
 
         return Task.cont
+
 
 app = MyApp()
 app.run()
