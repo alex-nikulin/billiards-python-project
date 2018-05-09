@@ -14,5 +14,3 @@ In this mode camera automaticly follows your mouse pointer (which is hidden) and
 zoom is unavailable. To retrun to previous mode, press "escape".
 
 If you press "shift" while rotating camera, rotation will be much less. This feature is to take aim better.
-
-саня пидор
