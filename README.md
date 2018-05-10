@@ -3,8 +3,6 @@ Final project for python course
 
 Panda3d is required for run this game.
 
-The main runnable file is "billiards_main.py"
-
 You may rotate camera around center of table with left mouse button, zoom with mouse wheel,
 Also if you press "enter", camera will snap to position of red ball.
 In this mode camera automaticly follows your mouse pointer (which is hidden) and 
