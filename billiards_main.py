@@ -69,7 +69,20 @@ class Handler(DirectObject.DirectObject):
         self.accept('mouse2-down', self.mouse3down)
         self.accept('enter', self.enter)
         self.accept('escape', self.escape)
+        self.accept('arrow_up', self.arrow_up)
+        self.accept('arrow_up-up', self.arrow_up_up)
+        self.accept('arrow_down', self.arrow_down)
+        self.accept('arrow_down-up', self.arrow_down_up)
+        self.accept('arrow_left', self.arrow_left)
+        self.accept('arrow_left-up', self.arrow_left_up)
+        self.accept('arrow_right', self.arrow_right)
+        self.accept('arrow_right-up', self.arrow_right_up)
+        self.arrow_upv = False
+        self.arrow_downv = False
+        self.arrow_leftv = False
+        self.arrow_rightv = False
         self.trackMouse = False
+        self.mouseLeftDown = False
         self.slow = False
         self.change_zoom = False
         self.radius = 20
@@ -89,14 +102,42 @@ class Handler(DirectObject.DirectObject):
             "zoomed_mode":"game",
             "strength_mode":"zoomed_mode"
         }
-        self.currentGameState = "game"
-        self.theGameHasChanged = False
+        self.currentGameState = "menu"
+        self.theGameHasChanged = True
+
+    def arrow_up(self):
+        self.arrow_upv = True
+        print("up")
+
+    def arrow_up_up(self):
+        self.arrow_upv = False
+
+    def arrow_down(self):
+        self.arrow_downv = True
+
+    def arrow_down_up(self):
+        self.arrow_downv = False
+
+    def arrow_left(self):
+        self.arrow_leftv = True
+
+    def arrow_left_up(self):
+        self.arrow_leftv = False
+
+    def arrow_right(self):
+        self.arrow_rightv = True
+
+    def arrow_right_up(self):
+        self.arrow_rightv = False
+
 
     def mouse1down(self):
         self.trackMouse = True
+        self.mouseLeftDown = True
 
     def mouse1up(self):
         self.trackMouse = False
+        self.mouseLeftDown = False
 
     def shift_down(self):
         self.slow = True
@@ -208,7 +249,7 @@ class MyApp(ShowBase):
         self.strength = 0
         self.list_of_balls = []
 
-        self.taskMgr.add(self.balls, "balls")
+        #self.taskMgr.add(self.balls, "balls")
         #self.taskMgr.add(self.hitHandler, "tracking")
         self.taskMgr.add(self.gameStateOvereseer, "overseer")
         #self.taskMgr.add(self.followPointer, "pointer")
@@ -228,27 +269,30 @@ class MyApp(ShowBase):
         for i in range(1, 6):
             for j in range(i):
                 self.mass_circle.append(Circle(id, y, x + j * 2 * (r + 0.0001), r, 0, 0, self.mydir,
-                                            self.render, [0 for i in range(18)], [0 for j in range(16)], 0.00001))
+                                            self.render, [0 for i in range(18)], [0 for j in range(16)], 0.00005))
                 id += 1
             x -= r + 0.0001
             y -= (r + 0.0001) * 3 ** 0.5
 
         self.mass_circle.append(Circle(id, 15 * r, 0, r, 0, 0, self.mydir,
-                                       self.render, [0 for i in range(18)], [0 for j in range(16)], 0.00001))
+                                       self.render, [0 for i in range(18)], [0 for j in range(16)], 0.00005))
         self.mass_circle[-1].model.setColorScale(0.54, 0, 0, 1)
+        self.mass_circle[-1].model.setTag("unique", "aaa")
         self.mass_circle[-1].model.setShaderAuto()
         self.kiy = self.loader.loadModel(self.mydir + "/models/kiy.egg")
         self.kiy.reparentTo(self.mass_circle[-1].model)
         self.kiy.setScale(0.5, 0.5, 0.5)
         self.kiy.hide()
-
+        """
         points1 = [
             (15 * r, 1.5 * r),
             (17 * r, 1.5 * r),
-            (15 * r,  30 * r),
-            (17 * r, 32  * r),
-
+            (15 * r,  28 * r),
+            (17 * r,  30 * r),
+            (15 * r,  32 * r),
+            (13 * r,  30 * r),
         ]
+        """
 
         self.mass_string = [Line(0, 2 * r, 0, 4 * r, 2 * r, 255, 255, 0, 6),
                        Line(1, 4 * r, 2 * r, 30.5 * r, 2 * r, 255, 255, 0, 4),
@@ -268,18 +312,36 @@ class MyApp(ShowBase):
                        Line(15, 64 * r, 2 * r, 62 * r, 4 * r, 255, 255, 0, 6),
                        Line(16, 62 * r, 4 * r, 62 * r, 30 * r, 255, 255, 0, 4),
                        Line(17, 62 * r, 30 * r, 64 * r, 32 * r, 255, 255, 0, 6)]
-
+        """
         for i in range(len(self.mass_string)):
             self.mass_string[i].x1 -= 32 * r
             self.mass_string[i].x2 -= 32 * r
             self.mass_string[i].y1 -= 17 * r
             self.mass_string[i].y2 -= 17 * r
 
+        for i in self.mass_string:
+            id += 1
+            self.model = loader.loadModel(self.mydir + "/models/ball.egg")
+            self.model.reparentTo(self.render)
+            self.model.setColorScale(0.4, 0.4, 0.4, 1)
+            self.model.setPos(i.x1, i.y1, 1)
+            self.model.setScale(0.1, 0.1, 0.1)
+
+            self.model = loader.loadModel(self.mydir + "/models/ball.egg")
+            self.model.reparentTo(self.render)
+            self.model.setColorScale(0.4, 0.4, 0.4, 1)
+            self.model.setPos(i.x2, i.y2, 1)
+            self.model.setScale(0.1, 0.1, 0.1)
+
+        """
+
+        self.i = 0 #просто счётчик
         self.gameData = Physics(self.mass_circle, self.mass_string)
         self.current_ball = -1
         self.cameraLookAt = [0, 0, 0.7]
-
-        """self.tracker = self.loader.loadModel(self.mydir + "/models/circle.egg")
+        self.set_background_color(0.1, 0.1, 0.1)
+        """
+        self.tracker = self.loader.loadModel(self.mydir + "/models/circle.egg")
         self.tracker.set_scale(0.015, 0.015, 0.015)
         self.tracker.reparentTo(self.render)
         self.pickerNode = CollisionNode('mouseRay')
@@ -288,6 +350,83 @@ class MyApp(ShowBase):
         self.pickerRay = CollisionRay()
         self.pickerNode.addSolid(self.pickerRay)
         self.cTrav.addCollider(self.pickerNP, self.handler)"""
+
+        self.gameData.balls[-1].model.setPos(0, 0, 0.82)
+
+        fontBig = loader.loadFont("century_gothic.ttf")
+        font = loader.loadFont("century_gothic.ttf")
+        fontBig.setPixelsPerUnit(250)
+
+        self.b = OnscreenText(text="Billiards", scale=.5, pos=(self.a2dpLeft * 0.5, self.a2dpBottom * 0.6), font=font,
+                              fg=(1, 1, 1, 1))
+        self.b.reparentTo(self.a2dTopCenter)
+        self.b.setPos(self.a2dpLeft * 0.5, self.a2dpBottom * 0.6)
+
+        self.bNewGame = DirectButton(text="New Game", text_font=fontBig, text_scale=0.8, scale=0.2, command=self.startGame,
+                                     text_fg=(1, 1, 1, 1),
+                                     frameColor=((0, 0, 0, 0), (0.5, 0.5, 0.5, 0.1)))
+        self.bNewGame.reparentTo(self.b)
+        self.bNewGame.setPos(self.a2dpLeft * 0.5, 0, self.a2dpBottom)
+
+        self.bquit = DirectButton(text="Quit", text_font=font, text_scale=0.8, command=self.quit,
+                                  text_fg=(1, 1, 1, 1), frameColor=((0, 0, 0, 0), (0.5, 0.5, 0.5, 0.1)))
+        self.bquit.reparentTo(self.bNewGame)
+        self.bquit.setPos(0, 0, self.a2dpBottom * 2)
+
+        self.back = DirectFrame(frameColor=(0, 0, 0, 0.6),
+                                frameSize=(-5, 5, -5, 5),
+                                parent=self.a2dBackground)
+
+        self.pauseText = OnscreenText(text="PAUSE", scale=.3, pos=(0, self.a2dpTop * 0.5), font=font,
+                              fg=(1, 1, 1, 1))
+        self.pauseText.hide()
+
+        self.bResume = DirectButton(text="Resume", text_font=font, text_scale=0.8, command=self.resumeGame, scale=0.2,
+                                    text_fg=(1, 1, 1, 1), frameColor=((0, 0, 0, 0), (0.5, 0.5, 0.5, 0.1)))
+        self.bResume.hide()
+
+        self.bReturnToMenu = DirectButton(text="Quit to menu", text_font=font, text_scale=0.8, command=self.toMenu,
+                           text_fg=(1, 1, 1, 1), frameColor=((0, 0, 0, 0), (0.5, 0.5, 0.5, 0.1)))
+        self.bReturnToMenu.reparentTo(self.bResume)
+        self.bReturnToMenu.setPos(0, 0, self.a2dpBottom )
+        self.bReturnToMenu.hide()
+
+        self.bQuitFromPause = DirectButton(text="Quit to Desktop", text_font=font, text_scale=0.8, command=self.quit,
+                                           text_fg=(1, 1, 1, 1), frameColor=((0, 0, 0, 0), (0.5, 0.5, 0.5, 0.1)))
+        self.bQuitFromPause.reparentTo(self.bResume)
+        self.bQuitFromPause.setPos(0, 0, self.a2dpBottom * 2)
+        self.bQuitFromPause.hide()
+
+    def resumeGame(self):
+        self.handler.currentGameState = "game"
+        self.handler.theGameHasChanged = True
+
+    def startGame(self):
+        r = 0.1
+        x = 0
+        y = - r * 15
+        k = 0
+        for i in range(1, 6):
+            for j in range(i):
+                self.mass_circle[k].vel_x = 0.00001
+                self.mass_circle[k].vel_y = 0.00001
+                self.mass_circle[k].x = y
+                self.mass_circle[k].y = x + j * 2 * (r + 0.0001)
+                k += 1
+            x -= r + 0.0001
+            y -= (r + 0.0001) * 3 ** 0.5
+
+
+        self.handler.currentGameState = "game"
+        self.handler.theGameHasChanged = True
+
+    def toMenu(self):
+        self.handler.currentGameState = "menu"
+        self.handler.theGameHasChanged = True
+
+    @staticmethod
+    def quit():
+        sys.exit()
 
     #camera rotation
     def spin_camera(self):
@@ -336,7 +475,6 @@ class MyApp(ShowBase):
         elif self.handler.change_zoom:
             self.change_zoom()
 
-
     def change_zoom(self):
             cameraHorHprRadians = self.camera.getHpr()[0] * math.pi / 180.0
             cameraVerHprRadians = self.camera.getHpr()[1] * math.pi / 180.0
@@ -352,39 +490,13 @@ class MyApp(ShowBase):
             -self.handler.radius * math.cos(cameraVerHprRadians) * math.cos(cameraHorHprRadians) + self.cameraLookAt[1],
             -self.handler.radius * math.sin(cameraVerHprRadians) + self.cameraLookAt[2])
 
-    def balls(self, Task):
+    def balls(self):
         self.gameData.drawing_circle()
         self.gameData.moving()
-        self.gameData.check_boarder()
+        if self.gameData.check_boarder():
+            self.handler.currentGameState = "choose_ball"
         self.gameData.collisions_mass()
-        #self.gameData.collisions_line()
-        return Task.cont
-
-
-
-    def hitHandler(self, Task):
-        if self.handler.theGameHasChanged and self.mass_circle:
-            if self.handler.currentGameState == "zoomed_mode":
-                self.cameraLookAt = self.mass_circle[self.current_ball].model.getPos(self.render)
-                self.handler.theGameHasChanged = False
-            elif self.handler.currentGameState == "game":
-                self.cameraLookAt = [0, 0, 0.7]
-                self.handler.theGameHasChanged = False
-
-
-            cameraHorHprRadians = self.camera.getHpr()[0] * math.pi / 180.0
-            cameraVerHprRadians = self.camera.getHpr()[1] * math.pi / 180.0
-            self.handler.radius = 3 if self.handler.currentGameState == "zoomed_mode" else 10
-            self.camera.setPos(
-                self.handler.radius * math.cos(cameraVerHprRadians) * math.sin(cameraHorHprRadians) + self.cameraLookAt[
-                    0],
-                -self.handler.radius * math.cos(cameraVerHprRadians) * math.cos(cameraHorHprRadians) +
-                self.cameraLookAt[1],
-                -self.handler.radius * math.sin(cameraVerHprRadians) + self.cameraLookAt[2])
-
-        if self.handler.trackMouse and self.handler.currentGameState == "target":
-            self.strength += self.mouseWatcherNode.getMouseY()
-
+        self.gameData.correct_collisions(0.1)
         return Task.cont
 
     def posKiy(self):
@@ -399,9 +511,45 @@ class MyApp(ShowBase):
         self.kiy.setH(self.kiy.getH() + 90)
 
     def gameStateOvereseer(self, Task):
+        if self.handler.currentGameState == "menu":
+            if self.handler.theGameHasChanged:
+                self.camera.setHpr(112, -20, 0)
+                self.handler.theGameHasChanged = False
+                self.b.show()
+                self.bNewGame.show()
+                self.bquit.show()
+                self.back.show()
+                self.pauseText.hide()
+                self.bResume.hide()
+                self.bQuitFromPause.hide()
+                self.bReturnToMenu.hide()
+                self.balls()
+
+
+            cameraHorHprRadians = 100 * math.pi / 180.0
+            cameraVerHprRadians = -20 * math.pi / 180.0
+            self.camera.setPos(
+                10 * math.cos(cameraVerHprRadians) * math.sin(cameraHorHprRadians) + self.cameraLookAt[
+                    0],
+                -10 * math.cos(cameraVerHprRadians) * math.cos(cameraHorHprRadians) +
+                self.cameraLookAt[1],
+                -10 * math.sin(cameraVerHprRadians) + self.cameraLookAt[2])
+
+        if self.handler.currentGameState == "pause":
+            if self.handler.theGameHasChanged:
+                self.kiy.hide()
+                self.back.show()
+                self.bResume.show()
+                self.bQuitFromPause.show()
+                self.bReturnToMenu.show()
+                self.pauseText.show()
+                self.handler.theGameHasChanged = False
+                print("show")
+
         if self.handler.currentGameState == "game":
             if self.handler.theGameHasChanged:
                 self.cameraLookAt = [0, 0, 0.7]
+                self.camera.setHpr(90, -20, 0)
                 self.handler.radius = 10
                 self.handler.theGameHasChanged = False
                 props = WindowProperties()
@@ -409,11 +557,89 @@ class MyApp(ShowBase):
                 self.win.requestProperties(props)
                 self.updateCamera()
                 self.kiy.hide()
-
+                self.b.hide()
+                self.bNewGame.hide()
+                self.bquit.hide()
+                self.back.hide()
+                self.pauseText.hide()
+                self.bResume.hide()
+                self.bQuitFromPause.hide()
+                self.bReturnToMenu.hide()
             if self.handler.enterPressed and len(self.gameData.balls) > 0:
                 self.handler.currentGameState = "zoomed_mode"
                 self.handler.theGameHasChanged = True
                 self.handler.enterPressed = False
+            if self.handler.trackMouse:
+                self.spin_camera()
+            elif self.handler.change_zoom:
+                self.change_zoom()
+                self.handler.change_zoom = False
+            elif self.newMousePos[2] != "Empty":
+                self.newMousePos[2] = "Empty"
+                props = WindowProperties()
+                props.setCursorHidden(False)
+                self.win.requestProperties(props)
+            self.balls()
+
+        elif self.handler.currentGameState == "choose_ball":
+            if self.handler.theGameHasChanged:
+                self.i = 0
+                self.handler.theGameHasChanged = False
+            if self.handler.arrow_leftv:
+                self.i -= 1
+                if self.i < 0:
+                    self.i = 14
+                self.gameData.balls[self.i + 1 if self.i != 14 else 0].model.setColorScale(1, 1, 1, 1)
+                self.handler.arrow_leftv = False
+            if self.handler.arrow_rightv:
+                self.i += 1
+                if self.i > 14:
+                    self.i = 0
+                self.gameData.balls[self.i - 1 if self.i else 14].model.setColorScale(1, 1, 1, 1)
+                self.handler.arrow_rightv = False
+            self.gameData.balls[self.i].model.setColorScale(0.5, 0.5, 0.5, 1)
+            if self.handler.trackMouse:
+                self.spin_camera()
+            elif self.handler.change_zoom:
+                self.change_zoom()
+                self.handler.change_zoom = False
+            elif self.newMousePos[2] != "Empty":
+                self.newMousePos[2] = "Empty"
+                props = WindowProperties()
+                props.setCursorHidden(False)
+                self.win.requestProperties(props)
+            if self.handler.enterPressed:
+                self.gameData.balls[self.i].model.hide()
+                self.gameData.balls.pop(self.i)
+                for j in range(len(self.gameData.balls)):
+                    self.gameData.balls[j].check_point_circle.pop(self.i)
+                for i in range(len(self.gameData.balls)):
+                    self.gameData.balls[i].identical_number = i
+                self.handler.currentGameState = "choose_pos"
+                self.handler.theGameHasChanged = True
+
+
+
+        elif self.handler.currentGameState == "choose_pos":
+            if self.handler.theGameHasChanged:
+                self.gameData.balls[-1].x = 0
+                self.gameData.balls[-1].y = 0
+                self.gameData.balls[-1].vel_x = 0.00001
+                self.gameData.balls[-1].val_y = 0.00001
+                self.gameData.balls[-1].model.show()
+                self.handler.theGameHasChanged = False
+
+            if self.handler.arrow_upv:
+                self.gameData.balls[-1].x += 0.03
+
+            if self.handler.arrow_downv:
+                self.gameData.balls[-1].x = -0.03
+
+            if self.handler.arrow_leftv:
+                self.gameData.balls[-1].y = 0.03
+
+            if self.handler.arrow_rightv:
+                self.gameData.balls[-1].y = -0.03
 
             if self.handler.trackMouse:
                 self.spin_camera()
@@ -425,8 +651,18 @@ class MyApp(ShowBase):
                 props = WindowProperties()
                 props.setCursorHidden(False)
                 self.win.requestProperties(props)
+            if self.handler.enterPressed:
+                self.handler.currentGameState = "game"
+                self.handler.theGameHasChanged = True
+            self.balls()
+
+
+
+
+
 
         elif self.handler.currentGameState == "zoomed_mode":
+            self.balls()
             if self.handler.theGameHasChanged and self.gameData.balls:
                 self.cameraLookAt = self.gameData.balls[self.current_ball].model.getPos(self.render)
                 self.handler.radius = 4
@@ -434,21 +670,23 @@ class MyApp(ShowBase):
                 self.updateCamera()
                 self.posKiy()
                 self.kiy.show()
-            if self.mouseWatcherNode.hasMouse():
+            elif self.handler.mouseLeftDown:
+                self.handler.mouseLeftDown = False
+                self.handler.currentGameState = "strength_mode"
+            elif self.mouseWatcherNode.hasMouse():
                 self.spin_camera()
                 self.posKiy()
             elif self.newMousePos[2] != "Empty":
                 self.newMousePos[2] = "Empty"
-            if self.handler.trackMouse:
-                self.handler.currentGameState = "strength_mode"
 
         elif self.handler.currentGameState == "strength_mode":
+            self.balls()
             if self.mouseWatcherNode.hasMouse() and self.handler.trackMouse:
                 self.handler.strength -= self.mouseWatcherNode.getMouseY()
                 if self.handler.strength < 1.46:
                     self.handler.strength = 1.46
-                if self.handler.strength > 5:
-                    self.handler.strength = 5
+                if self.handler.strength > 7:
+                    self.handler.strength = 7
                 print(self.handler.strength)
                 self.posKiy()
                 props = self.win.getProperties()
@@ -460,6 +698,7 @@ class MyApp(ShowBase):
                 self.strength = self.handler.strength
 
         elif self.handler.currentGameState == "shot":
+            self.balls()
             if self.handler.strength > 0.5:
                 self.handler.strength -= self.strength / 10
                 self.posKiy()
@@ -470,7 +709,6 @@ class MyApp(ShowBase):
                 self.gameData.balls[-1].vel_y = 0.01 * self.strength * math.cos(self.camera.getH() * math.pi / 180)
                 self.handler.currentGameState = "game"
                 self.handler.theGameHasChanged = True
-
 
         elif self.handler.currentGameState == "target":
             self.strength += self.mouseWatcherNode.getMouseY()
