@@ -267,7 +267,6 @@ class Circle:
         return [self.x, self.y, self.z]
 
 
-
 class Balls:
     def __init__(self, default_list=[]):
         self.balls = default_list
@@ -306,9 +305,8 @@ class Balls:
 
 
 class Physics:
-    def __init__(self, balls, lines, height=1.6, width=3.1):
+    def __init__(self, balls, height=1.6, width=3.1):
         self.balls = balls
-        self.lines = lines
         self.width = height
         self.height = width
 
@@ -319,10 +317,6 @@ class Physics:
                 if len(self.balls) - x < i:
                     collisions(self.balls[len(self.balls) - x], self.balls[i])
             x -= 1
-
-    def collisions_line(self):
-        for i in range(len(self.balls)):
-            check_string(self.balls[i], self.lines)
 
     def drawing_circle(self):
         for i in self.balls:
@@ -372,6 +366,17 @@ class Physics:
         return False
 
     def angle_correct_collisions(self, ball, x1, y1, x2, y2, signx, signy):
+        """
+        соударения с уловыми лузами. signx и signy позволяет быстрее применять её для всех 4 углов при однох и тех же
+        x1, y1. x2. y2
+        :param ball: объект класса Circle
+        :param x1: x первого угла
+        :param y1: y первого угла
+        :param x2: x второго угла
+        :param y2: y второго угла
+        :param signx: знак х координаты
+        :param signy: знак у координаты
+        """
         if ((ball.x - x1) ** 2 + (ball.y - y1) ** 2) ** 0.5 < ball.r:
             self.point_correct_collisions(ball, x1, y1)
         elif ((ball.x - x2) ** 2 + (ball.y - y2) ** 2) ** 0.5 < ball.r:
@@ -382,6 +387,12 @@ class Physics:
             self.point_correct_collisions(ball, ball.x + ball.r * signx, ball.y - ball.r * signy)
 
     def point_correct_collisions(self, ball, x, y):
+        """
+        соударения с точкой
+        :param ball: объект класса Circlr
+        :param x: x точки
+        :param y: у точки
+        """
         point = Vector(x, y)
         pos = Vector(ball.x, ball.y)
         velo = Vector(ball.vel_x, ball.vel_y)
@@ -391,6 +402,10 @@ class Physics:
         ball.vel_y = velo.y
 
     def correct_collisions(self, r):
+        """
+        расчёт столкновений с бортиками
+        :param r: радиус шара для расчёта(стол измерятеся в радиусах шара)
+        """
         for i in range(len(self.balls)):
             ball = self.balls[i]
             ball.x, ball.y = ball.y, ball.x
