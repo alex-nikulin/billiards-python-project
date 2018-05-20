@@ -59,7 +59,7 @@ class Handler(DirectObject.DirectObject):
         Пара слов про gameStateData. Это список смежности для ориентированного графа с двумя компонентами
         связности и с полустепенью исхода для каждой вершины не больше единицы (то есть из данной вершины можно попасть
         только в одну другую вершину или никуда). Вершины графа являются состояниями игры, а по рёбрам можно перемещаться с
-        помощью кнопки 'escape'. Переход осуществляется здесь же
+        помощью кнопки 'escape'. Переход осуществляется здесь же в функции 'escape'.
         """
         self.accept('mouse1', self.mouse1down)
         self.accept('mouse1-up', self.mouse1up)
@@ -78,25 +78,25 @@ class Handler(DirectObject.DirectObject):
         self.accept('arrow_left-up', self.arrow_left_up)
         self.accept('arrow_right', self.arrow_right)
         self.accept('arrow_right-up', self.arrow_right_up)
-        #для стрелок
+        # для стрелок
         self.arrow_upv = False
         self.arrow_downv = False
         self.arrow_leftv = False
         self.arrow_rightv = False
-        #отслеживай мышку - поднимается при нажатии ЛКМ
+        # отслеживай мышку - поднимается при нажатии ЛКМ
         self.trackMouse = False
-        #понадобился для отслеживания нажатий в то время как предыдущий флаг может продолжать быть в True
+        # понадобился для отслеживания нажатий в то время как предыдущий флаг может продолжать быть в True
         self.mouseLeftDown = False
         self.slow = False
         self.change_zoom = False
-        #дальность камеры от точки cameraLookAt
+        # дальность камеры от точки cameraLookAt
         self.radius = 20
-        #сила удара и расстояние от кия до шара по совместительству
+        # сила удара и расстояние от кия до шара по совместительству
         self.strength = 2
         self.enterPressed = False
         self.remove_ball = False
         self.zoomBall = False
-        #это нужно для небольшой особенности правил Московской пирамиды
+        # это нужно для небольшой особенности правил Московской пирамиды
         self.dontForgetToReplaceBall = False
         self.gameStateData = {
             "menu": "quit",
@@ -108,14 +108,13 @@ class Handler(DirectObject.DirectObject):
             "zoomed_mode": "game",
             "strength_mode": "zoomed_mode"
         }
-        #текущее состояние игры
+        # текущее состояние игры
         self.currentGameState = "menu"
-        #отсюда цикл узнаёт, что в предыдущем кадре игра была в другом состоянии и нужно выполнить кое-какие действия
+        # отсюда цикл узнаёт, что в предыдущем кадре игра была в другом состоянии и нужно выполнить кое-какие действия
         self.theGameHasChanged = True
 
     def arrow_up(self):
         self.arrow_upv = True
-        print("up")
 
     def arrow_up_up(self):
         self.arrow_upv = False
@@ -168,7 +167,6 @@ class Handler(DirectObject.DirectObject):
 
     def enter(self):
         self.enterPressed = True
-        print('lookingAtBall')
 
     def finishTracking(self):
         self.trackBall = False
@@ -187,85 +185,85 @@ class MyApp(ShowBase):
     def __init__(self):
         ShowBase.__init__(self)
 
-        #получаем директорию, в которой лежит игра
+        # получаем директорию, в которой лежит игра
         self.mydir = os.path.abspath(sys.path[0])
         self.mydir = Filename.fromOsSpecific(self.mydir).getFullpath()
 
-        #загружаем бортики, которые зелёные
+        # загружаем бортики, которые зелёные
         self.vborders = self.loader.loadModel(self.mydir + "/models/borders2.egg")
         self.vborders.reparentTo(self.render)
         self.vborders.setColorScale(0, 0.6, 0, 1)
         self.vborders.setHpr(90, 0, 0)
 
-        #загружаем стол
+        # загружаем стол
         self.table = self.loader.loadModel(self.mydir + "/models/table2.egg")
         self.table.reparentTo(self.render)
         self.table.setHpr(90, 0, 0)
 
-        #загружаем зелёное поле, по которому будут кататься шары
-        #нужно, чтобы не заморачиваться с текстурированием стола
+        # загружаем зелёное поле, по которому будут кататься шары
+        # нужно, чтобы не заморачиваться с текстурированием стола
         self.velvet = self.loader.loadModel(self.mydir + "/models/velvet2.egg")
         self.velvet.reparentTo(self.render)
         self.velvet.setColorScale(0, 0.6, 0, 1)
         self.velvet.setHpr(90, 0, 0)
 
-        #это те металлические дуги, которые держат сетку в лузе
+        # это те металлические дуги, которые держат сетку в лузе
         self.loosers = self.loader.loadModel(self.mydir + "/models/pocket2.egg")
         self.loosers.reparentTo(self.render)
         self.loosers.setColorScale(0, 0, 0, 1)
         self.loosers.setHpr(90, 0, 0)
 
-        #сетка(все шесть штук)
+        # сетка(все шесть штук)
         self.loos = self.loader.loadModel(self.mydir + "/models/pocketnet2.egg")
         self.loos.reparentTo(self.render)
         self.loos.setColorScale(1, 1, 1, 1)
         self.loos.setHpr(90, 0, 0)
 
-        #большие деревянные борты
+        # большие деревянные борты
         self.borders = self.loader.loadModel(self.mydir + "/models/woodenborders2.egg")
         self.borders.reparentTo(self.render)
         self.borders.setHpr(90, 0, 0)
 
-        #загружаем текстуру дерева и устанавоиваем столу и деревянным бортам
-        #модели уже развёрнуты
+        # загружаем текстуру дерева и устанавоиваем столу и деревянным бортам
+        # модели уже развёрнуты
         wood = self.loader.loadTexture(self.mydir + '/models/tex/WoodColor.jpg')
         self.table.setTexture(wood)
         self.borders.setTexture(wood)
 
-        #проблемы с установкой цвета. Да, это просто монотонный зелёный цвет.
-        #для этих моделей тоже сделаны развёртки, так что в будущем можно найти качественную текстуру
-        #бильярдного сукна (я не нашёл) и просто поменять здесь
+        # проблемы с установкой цвета. Да, это просто монотонный зелёный цвет.
+        # для этих моделей тоже сделаны развёртки, так что в будущем можно найти качественную текстуру
+        # бильярдного сукна (я не нашёл) и просто поменять здесь
         velvet = self.loader.loadTexture(self.mydir + '/models/tex/green.jpg')
         self.velvet.setTexture(velvet)
         self.vborders.setTexture(velvet)
 
-        #освещение
+        # освещение
         self.plight = PointLight('plight')
         self.plight.setColor((1, 1, 1, 1))
         plnp = self.render.attachNewNode(self.plight)
         plnp.setPos(0, 0, 10)
         self.render.setLight(plnp)
 
-        #установка шейдеров и теней
+        # установка шейдеров и теней
         self.plight.setShadowCaster(True, 2048, 2048)
         # Enable the shader generator for the receiving nodes
         self.render.setShaderAuto()
 
-        #просто флажок потом нужен будет
+        # просто флажок потом нужен будет
         self.followPointerPos = False
 
         self.strength = 0
         self.list_of_balls = []
 
-        #это в игру добавляется главная функция, значит что она будет вызвана во время игры
+        # это в игру добавляется главная функция, значит что она будет вызвана во время игры
         self.taskMgr.add(self.gameStateOverseer, "overseer")
 
-        #эта функция отключает базовое управление камеры мышкой. Оно крайне неудобно
+        # эта функция отключает базовое управление камеры мышкой. Оно крайне неудобно
         self.disable_mouse()
-        #создаём обработчика событий, который будет докладывать о всех (всех нужных) действиях пользователя
+        # создаём обработчика событий, который будет докладывать о всех (всех нужных) действиях пользователя
         self.handler = Handler()
 
-        #стартовое положение камеры
+        # стартовое положение камеры
         self.camera.setHpr(0,
                            -90,
                            0)
@@ -273,7 +271,7 @@ class MyApp(ShowBase):
                            -self.handler.radius * math.cos(self.camera.getHpr()[1] * 3.1415926 / 180) * math.cos(self.camera.getHpr()[0] * 3.1415926 / 180),
                            -self.handler.radius * math.sin(self.camera.getHpr()[1] * 3.1415926 / 180) + 0.7)
 
-        #располагаем шары на столе
+        # располагаем шары на столе
         r = 0.1
         x = 0
         y = - r * 15
@@ -287,14 +285,14 @@ class MyApp(ShowBase):
             x -= r + 0.0001
             y -= (r + 0.0001) * 3 ** 0.5
 
-        #а это наш биток (красный шар)
+        # а это наш биток (красный шар)
         self.mass_circle.append(Circle(id, 15 * r, 0, r, 0, 0, self.mydir,
                                        self.render, [0 for i in range(18)], [0 for j in range(16)], 0.00005))
         self.mass_circle[-1].model.setColorScale(0.54, 0, 0, 1)
         self.mass_circle[-1].model.setTag("unique", "aaa")
         self.mass_circle[-1].model.setShaderAuto()
 
-        #загружаем кий
+        # загружаем кий
         """
         Тут стоит сделать лирическое отступление о структуре игровой сцены в panda3d.
         Сцена представляет собой дерево, вершинами которого являются объекты класса NodePath и все наследуемые из него
@@ -319,14 +317,14 @@ class MyApp(ShowBase):
 
         self.gameData.balls[-1].model.setPos(0, 0, 0.82)
 
-        #здесь загружаются шрифты
+        # здесь загружаются шрифты
         fontBig = loader.loadFont("century_gothic.ttf")
         fontBig.setPixelsPerUnit(250)
-        #менее качественный шрифт для опитимизации, если нужен меньший размер
+        # менее качественный шрифт для опитимизации, если нужен меньший размер
         font = loader.loadFont("century_gothic.ttf")
 
 
-        #тут создаются 2д кнопки и тексты для интерфейса
+        # тут создаются 2д кнопки и тексты для интерфейса
         self.b = OnscreenText(text="Billiards", scale=.5, pos=(self.a2dpLeft * 0.5, self.a2dpBottom * 0.6), font=font,
                               fg=(1, 1, 1, 1))
         self.b.reparentTo(self.a2dTopCenter)
@@ -343,8 +341,8 @@ class MyApp(ShowBase):
         self.bquit.reparentTo(self.bNewGame)
         self.bquit.setPos(0, 0, self.a2dpBottom * 2)
 
-        #полупрозрачный чёрный прямоугольик, который перекрывает весь экран, чтобы добавить красивого затеменения в меню
-        #а на заднем плане был бильярдный стол
+        # полупрозрачный чёрный прямоугольик, который перекрывает весь экран, чтобы добавить красивого затеменения в меню
+        # а на заднем плане был бильярдный стол
         self.back = DirectFrame(frameColor=(0, 0, 0, 0.6),
                                 frameSize=(-5, 5, -5, 5),
                                 parent=self.a2dBackground)
@@ -417,8 +415,8 @@ class MyApp(ShowBase):
         """
         Функция отвечает за поворот камеры. Если это первый кадр после нажатия мышки,
         то она прячет курсор, помещает его в центр, и отмечает тот факт, что с этого момента нужно просто
-        поворачивать камеру настолько, насколько сдвинулась мышь. Каждый кадр она будет снова и снова помещаться центр
-        так границы экрана не будут мешать крутить сцену. А если не двигать мышкой, то функция не будет лишний раз
+        поворачивать камеру настолько, насколько сдвинулась мышь. Каждый кадр курсор будет снова и снова помещаться центр.
+        Так границы экрана не будут мешать крутить сцену. А если не двигать мышкой, то функция не будет лишний раз
         пересчитвать положение камеры. В противном случае неточность вычислений дробных чисел даёт о себе знать
         и камера медленно двигается сама.
         """
@@ -518,15 +516,15 @@ class MyApp(ShowBase):
         """
             Функция следит за текущим состоянием игры currentGameState и производит необходимые
             действия по переходу в состояние и поддержание действий, производимых в нём.
-            Важное уточнение. Эта функция добвена в менеджер заданий (taskMgr) принимает некую переменную Task,
+            Важное уточнение. Эта функция добавлена в менеджер заданий (taskMgr) принимает некую переменную Task,
             эти действия означают, что функция будет вызываться каждый игровой кадр.
-            в целях оптимизации я решил огранчиться одной такой функцией и все остальные вызывать в зависимоти от
+            В целях оптимизации я решил огранчиться одной такой функцией и все остальные вызывать в зависимоти от
             состояния игры.
             :return: Task.cont - означает, что будет вызвана в следующий кадр
         """
         if self.handler.currentGameState == "menu":
-            #в блоках theGameHasChanged производятся действия по переходу из любого возможного предыдущего
-            #состояния игры в текущее, т. е. currentGameState
+            # в блоках theGameHasChanged производятся действия по переходу из любого возможного предыдущего
+            # состояния игры в текущее, т. е. currentGameState
             if self.handler.theGameHasChanged:
                 self.camera.setHpr(112, -20, 0)
                 self.cameraLookAt = [0, 0, 0.82]
@@ -555,7 +553,7 @@ class MyApp(ShowBase):
                 -10 * math.sin(cameraVerHprRadians) + self.cameraLookAt[2])
 
         if self.handler.currentGameState == "pause":
-            #нажатие на 'esc' в режиме 'game'
+            # нажатие на 'esc' в режиме 'game'
             if self.handler.theGameHasChanged:
                 self.kiy.hide()
                 self.back.show()
@@ -564,12 +562,12 @@ class MyApp(ShowBase):
                 self.bReturnToMenu.show()
                 self.pauseText.show()
                 self.handler.theGameHasChanged = False
-                print("show")
 
         if self.handler.currentGameState == "game":
-            #режим, в котором можно изменять масштаб, крутить стол, одним словом оценивать сложившееся положение
-            #отсюда можно попасть в 'pause' и 'zoomed_mode'
+            # режим, в котором можно изменять масштаб, крутить стол, одним словом оценивать сложившееся положение
+            # отсюда можно попасть в 'pause' и 'zoomed_mode'
             if self.handler.theGameHasChanged:
+                print('game')
                 self.cameraLookAt = [0, 0, 0.7]
                 self.handler.radius = 10
                 self.handler.theGameHasChanged = False
@@ -586,43 +584,49 @@ class MyApp(ShowBase):
                 self.bResume.hide()
                 self.bQuitFromPause.hide()
                 self.bReturnToMenu.hide()
-            print(self.gameData.check_velocity())
-            if self.handler.enterPressed and len(self.gameData.balls) > 0 and not self.gameData.check_velocity():
+            self.balls()
+            if self.handler.enterPressed and len(self.gameData.balls) > 0 and not self.gameData.check_velocity()\
+                    and not self.handler.dontForgetToReplaceBall:
                 self.handler.currentGameState = "zoomed_mode"
                 self.handler.theGameHasChanged = True
                 self.handler.enterPressed = False
-            #Поворот камеры
+            if not self.gameData.check_velocity() and self.handler.dontForgetToReplaceBall:
+                self.handler.currentGameState = "choose_ball"
+                self.handler.theGameHasChanged = True
+                self.handler.dontForgetToReplaceBall = False
+
+            # Поворот камеры
             if self.handler.trackMouse:
                 self.spin_camera()
             elif self.handler.change_zoom:
                 self.updateCamera()
                 self.handler.change_zoom = False
-            elif not self.followPointerPos:
+            if not self.handler.trackMouse:
                 self.followPointerPos = False
                 props = WindowProperties()
                 props.setCursorHidden(False)
                 self.win.requestProperties(props)
-
-            self.balls()
             if self.handler.enterPressed:
                 self.handler.enterPressed = False
 
         elif self.handler.currentGameState == "choose_ball":
-            #если в лузу загнан красный шар, то стрелками можно выбрать любой шар
+            # если в лузу загнан красный шар, то стрелками можно выбрать любой шар
+            maxx = len(self.gameData.balls) - 2
             if self.handler.theGameHasChanged:
                 self.i = 0
+                print('choose_ball')
                 self.handler.theGameHasChanged = False
             if self.handler.arrow_leftv:
                 self.i -= 1
                 if self.i < 0:
-                    self.i = 14
-                self.gameData.balls[self.i + 1 if self.i != 14 else 0].model.setColorScale(1, 1, 1, 1)
+                    self.i = maxx
+                self.gameData.balls[self.i + 1 if self.i != maxx else 0].model.setColorScale(1, 1, 1, 1)
                 self.handler.arrow_leftv = False
             if self.handler.arrow_rightv:
                 self.i += 1
-                if self.i > 14:
+                if self.i > maxx:
                     self.i = 0
-                self.gameData.balls[self.i - 1 if self.i else 14].model.setColorScale(1, 1, 1, 1)
+                self.gameData.balls[self.i - 1 if self.i else maxx].model.setColorScale(1, 1, 1, 1)
                 self.handler.arrow_rightv = False
             self.gameData.balls[self.i].model.setColorScale(0.5, 0.5, 0.5, 1)
             if self.handler.trackMouse:
@@ -630,7 +634,7 @@ class MyApp(ShowBase):
             elif self.handler.change_zoom:
                 self.updateCamera()
                 self.handler.change_zoom = False
-            elif not self.followPointerPos:
+            if not self.handler.trackMouse:
                 self.followPointerPos = False
                 props = WindowProperties()
                 props.setCursorHidden(False)
@@ -646,12 +650,11 @@ class MyApp(ShowBase):
                 self.handler.theGameHasChanged = True
                 self.handler.enterPressed = False
 
-
-
         elif self.handler.currentGameState == "choose_pos":
-            #после того, как белый шар убран, в центре появляется красный шар и опять же
-            #стрелками можно выбрат его новое положение
+            # после того, как белый шар убран, в центре появляется красный шар и опять же
+            # стрелками можно выбрат его новое положение
             if self.handler.theGameHasChanged:
+                print('choose_pos')
                 self.gameData.balls[-1].x = 0
                 self.gameData.balls[-1].y = 0
                 self.gameData.balls[-1].vel_x = 0
@@ -659,16 +662,16 @@ class MyApp(ShowBase):
                 self.gameData.balls[-1].model.show()
                 self.handler.theGameHasChanged = False
 
-            if self.handler.arrow_upv:
+            if self.handler.arrow_upv and self.gameData.balls[-1].x < 2.8:
                 self.gameData.balls[-1].x += 0.03
 
-            if self.handler.arrow_downv:
+            if self.handler.arrow_downv and self.gameData.balls[-1].x < 2.8:
                 self.gameData.balls[-1].x -= 0.03
 
-            if self.handler.arrow_leftv:
+            if self.handler.arrow_leftv and self.gameData.balls[-1].y < 1.5:
                 self.gameData.balls[-1].y += 0.03
 
-            if self.handler.arrow_rightv:
+            if self.handler.arrow_rightv and self.gameData.balls[-1].y > -1.5:
                 self.gameData.balls[-1].y -= 0.03
 
             if self.handler.trackMouse:
@@ -676,21 +679,23 @@ class MyApp(ShowBase):
             elif self.handler.change_zoom:
                 self.updateCamera()
                 self.handler.change_zoom = False
-            elif not self.followPointerPos:
+            if not self.handler.trackMouse:
                 self.followPointerPos = False
                 props = WindowProperties()
                 props.setCursorHidden(False)
                 self.win.requestProperties(props)
-            if self.handler.enterPressed:
+            if self.handler.enterPressed and self.gameData.intersects():
                 self.handler.currentGameState = "game"
                 self.handler.theGameHasChanged = True
+                self.handler.enterPressed = False
             self.balls()
 
         elif self.handler.currentGameState == "zoomed_mode":
-            #прицеливание
-            #'esc' возвращает в 'game', нажатие ЛКМ переводит в выбор силы
+            # прицеливание
+            # 'esc' возвращает в 'game', нажатие ЛКМ переводит в выбор силы
             self.balls()
             if self.handler.theGameHasChanged and self.gameData.balls:
+                print('zoomed_mode')
                 self.cameraLookAt = self.gameData.balls[self.current_ball].model.getPos(self.render)
                 self.handler.radius = 4
                 self.handler.theGameHasChanged = False
@@ -707,8 +712,9 @@ class MyApp(ShowBase):
                 self.followPointerPos = False
 
         elif self.handler.currentGameState == "strength_mode":
-            #после нажатия ЛКМ тянуть мышь на себя - сила увеличивается, обратное также верно.
-            #esc вернёт в 'zoomed_mode' с сохранением силы. Для произведения удара отпустить мышь
+            print('str_mode')
+            # после нажатия ЛКМ тянуть мышь на себя - сила увеличивается, обратное также верно.
+            # esc вернёт в 'zoomed_mode' с сохранением силы. Для произведения удара отпустить мышь
             self.balls()
             if self.mouseWatcherNode.hasMouse() and self.handler.trackMouse:
                 self.handler.strength -= self.mouseWatcherNode.getMouseY()
@@ -716,7 +722,6 @@ class MyApp(ShowBase):
                     self.handler.strength = 1.46
                 if self.handler.strength > 7:
                     self.handler.strength = 7
-                print(self.handler.strength)
                 self.posKiy()
                 props = self.win.getProperties()
                 self.win.movePointer(0,
@@ -731,11 +736,11 @@ class MyApp(ShowBase):
             #Небольшая анимация того, как кий стремительно и неумолимо надвигается на шар.
             self.balls()
             if self.handler.strength > 0.5:
+                print('shot')
                 self.handler.strength -= self.strength / 10
                 self.posKiy()
             else:
                 self.kiy.hide()
-                print("кий спрятан")
                 self.gameData.balls[-1].vel_x = - 0.01 * self.strength * math.sin(self.camera.getH() * math.pi / 180)
                 self.gameData.balls[-1].vel_y = 0.01 * self.strength * math.cos(self.camera.getH() * math.pi / 180)
                 self.handler.currentGameState = "game"

@@ -200,6 +200,8 @@ class Circle:
         self.model.setScale(0.1, 0.1, 0.1)
         self.model.reparentTo(parent)
         self.model.setShaderAuto()
+        self.out = False
+        self.buffer_for_velo = []
 
 
 
@@ -310,6 +312,12 @@ class Physics:
         self.width = height
         self.height = width
 
+    def intersects(self):
+        for i in range(len(self.balls) - 2):
+            if (self.balls[-1].x - self.balls[i].x) ** 2 + (self.balls[-1].y - self.balls[i].y) ** 2 < self.balls[-1].r **2:
+                return False
+        return True
+
     def collisions_mass(self):
         x = len(self.balls)
         while x > 1:
@@ -351,18 +359,22 @@ class Physics:
     """
     def check_boarder(self):
         i = 0
+        dontForget = False
         while i < len(self.balls):
             if (self.balls[i].x > self.height or self.balls[i].x < -self.height or
                 self.balls[i].y > self.width  or self.balls[i].y < -self.width):
                 self.balls[i].model.hide()
                 if self.balls[i].model.getTag("unique") == "aaa":
-                    return True
-                self.balls.pop(i)
-                for j in range(len(self.balls)):
-                    self.balls[j].check_point_circle.pop(i)
+                    dontForget = True
+                else:
+                    self.balls.pop(i)
+                    for j in range(len(self.balls)):
+                        self.balls[j].check_point_circle.pop(i)
             i += 1
         for i in range(len(self.balls)):
             self.balls[i].identical_number = i
+        if dontForget:
+            return True
         return False
 
     def angle_correct_collisions(self, ball, x1, y1, x2, y2, signx, signy):
@@ -379,17 +391,20 @@ class Physics:
         """
         if ((ball.x - x1) ** 2 + (ball.y - y1) ** 2) ** 0.5 < ball.r:
             self.point_correct_collisions(ball, x1, y1)
+            self.out = True
         elif ((ball.x - x2) ** 2 + (ball.y - y2) ** 2) ** 0.5 < ball.r:
             self.point_correct_collisions(ball, x2, y2)
+            self.out = True
         elif abs(ball.y) > abs(ball.x) + 17 * ball.r - ball.r * 2**0.5 and abs(ball.x) > 13 * ball.r + ball.r / (2**0.5):
             self.point_correct_collisions(ball, ball.x - ball.r * signx, ball.y + ball.r * signy)
+            self.out = True
         elif abs(ball.y) < abs(ball.x) + 13 * ball.r + ball.r * 2**0.5 and abs(ball.x) > 15 * ball.r - ball.r / (2**0.5):
             self.point_correct_collisions(ball, ball.x + ball.r * signx, ball.y - ball.r * signy)
 
     def point_correct_collisions(self, ball, x, y):
         """
         соударения с точкой
-        :param ball: объект класса Circlr
+        :param ball: объект класса Circle
         :param x: x точки
         :param y: у точки
         """
